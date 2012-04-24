@@ -28,6 +28,9 @@ terrain_val = {0:(0,0,128),     #DEEP_OCEAN
                6:(162,162,162), #LOW_MOUNTAIN
                7:(220,220,220)} #HIGH_MOUNTAIN
 
+threading = False
+
+threaded_count = 0
 
 class Generator:
     """
@@ -50,7 +53,7 @@ class Generator:
     
     def __init__(self):
         self.generate()
-    
+        
     def generate(self):
         """
         The main generation loop.
@@ -58,8 +61,12 @@ class Generator:
         """
         while 1:
             if self.canDraw:
-                print "Next terrain: ", self.next_terrain
-                self.next_terrain = self.draw_terrain(self.next_terrain)
+                #print "Next terrain: ", self.next_terrain
+                if threading:
+                    self.next_terrain = self.draw_terrain(self.next_terrain, threaded_count)
+                    threaded_count += 1
+                else:
+                    self.next_terrain = self.draw_terrain(self.next_terrain)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -103,7 +110,7 @@ class Generator:
         print "Top: ",top_val, " Left:", left_val
         
         if top_val == -1:
-            weight = 8
+            weight = 6
             ran_list = []
             while weight > 0:
                 ran_list.append(left_val)
@@ -126,7 +133,7 @@ class Generator:
             return terrain_val[random.choice(ran_list)]
             
         if top_val == left_val:
-            weight = 8
+            weight = 6
             ran_list = []
             while weight > 0:
                 ran_list.append(top_val)
