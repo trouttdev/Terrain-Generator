@@ -11,7 +11,7 @@ screen.fill((0,0,0))
 i_have_no_idea_what_im_doing = True
 
 #Set the terrain pixel size
-terrainSize = 2
+terrainSize = 5
 
 #terrain = {'DEEP_OCEAN',
 #           'SHALLOW_OCEAN',
@@ -209,7 +209,7 @@ class Generator:
             #mountain, you're more likely to get someting between the two to create a 'smoother'
             #overall terrain
             
-            weight = ((7/difference) * (.8*target_weights))/2 #gives up to an 80% chance that the terrain will
+            weight = ((7/difference) * (.7*target_weights))/2 #gives up to an 80% chance that the terrain will
                                                               #be either the top of left terrain (when they are one
                                                               #value away from one another)
             
