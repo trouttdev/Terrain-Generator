@@ -7,6 +7,9 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode(size)
 screen.fill((0,0,0))
 
+#debug mode
+i_have_no_idea_what_im_doing = True
+
 #Set the terrain pixel size
 terrainSize = 2
 
@@ -61,7 +64,10 @@ class Generator:
         """
         while 1:
             if self.canDraw:
-                #print "Next terrain: ", self.next_terrain
+                
+                if i_have_no_idea_what_im_doing:
+                    print "Next terrain: ", self.next_terrain
+                    
                 if threading:
                     self.next_terrain = self.draw_terrain(self.next_terrain, threaded_count)
                     threaded_count += 1
@@ -81,8 +87,8 @@ class Generator:
         """
         Get the next terrain color based on either the terrain above and/or to the left of the next tile
         """
-        
-        print "Location Y: ", self.locationY, " Location X: ", self.locationX, " next: ", self.locationX, " , ", self.locationY - terrainSize + 1
+        if i_have_no_idea_what_im_doing:
+            print "Location Y: ", self.locationY, " Location X: ", self.locationX, " next: ", self.locationX, " , ", self.locationY - terrainSize + 1
 
         #Get the pixel value of the terrain block above the current location
         if self.locationY > 0 and self.locationY <= height:
@@ -106,60 +112,119 @@ class Generator:
         else:
             left_val = -1
         
-        #Debug
-        print "Top: ",top_val, " Left:", left_val
+        if i_have_no_idea_what_im_doing:
+            print "Top: ",top_val, " Left:", left_val
         
+        """
+        This is an attempt at adding "weight" to the terrain
+        
+        What this does is takes the weight value and adds the terrain to the left into an array that amount of times.
+        In theory this will make the weighted value roughly the percentage chance of generating the left terrain again.
+        
+        Example: the weight is set to 6 the terrain to the, which you would set if you want the terrain left of the current
+                 position to be generated roughly 60% of the time. This will loop through and add that terrain to an array 6 times
+                 and with the target_weight set to 10, this would achieve roughly a 60% chance.
+                 
+        Once the array is loaded with possible terrain choices, a random terrain is selected using the random function and a terrain value
+        is chosen.
+        """
+        
+        #the rough amount of terrains you want in the array
+        target_weights = 10
+        
+        #If there is no top terrain value, should only be the case when in the topmost row
         if top_val == -1:
             weight = 6
             ran_list = []
-            while weight > 0:
-                ran_list.append(left_val)
-                weight -= 1
-            if left_val < 7:
-                ran_list.append(left_val+1)
-            if left_val > 0:
-                ran_list.append(left_val-1)
+            while target_weights > 0: 
+                while weight > 0:
+                    ran_list.append(left_val)
+                    weight -= 1
+                    target_weights -= 1
+                if left_val < 7:
+                    ran_list.append(left_val+1)
+                    target_weights -= 1
+                if left_val > 0:
+                    ran_list.append(left_val-1)
+                    target_weights -= 1
             return terrain_val[random.choice(ran_list)]
+        
+        #If there is no left value, should only be the case in the first column
         elif left_val == -1:
-            weight = 8
-            ran_list = []
-            while weight > 0:
-                ran_list.append(top_val)
-                weight -= 1
-            if top_val < 7:    
-                ran_list.append(top_val+1)
-            if top_val > 0:
-                ran_list.append(top_val-1)
-            return terrain_val[random.choice(ran_list)]
-            
-        if top_val == left_val:
             weight = 6
             ran_list = []
-            while weight > 0:
-                ran_list.append(top_val)
-                weight -= 1
-            if top_val < 7:    
-                ran_list.append(top_val+1)
-            if top_val > 0:
-                ran_list.append(top_val-1)
-            return terrain_val[random.choice(ran_list)]
-        else:
-            difference = abs(top_val - left_val)
-            print "zTop: ",top_val," Left: ",left_val
-            weight = difference % 3
-            print "Weight: ", weight
-            ran_list = []
-            while weight > 0:
-                ran_list.append(top_val)
-                ran_list.append(left_val)
-                weight -= 1
-            if difference < 0:
-                difference = -difference
-            while difference > 0:
+            while target_weights > 0: 
+                while weight > 0:
+                    ran_list.append(top_val)
+                    weight -= 1
+                    target_weights -= 1
+                if top_val < 7:    
+                    ran_list.append(top_val+1)
+                    target_weights -= 1
                 if top_val > 0:
-                    top_val = top_val - 1
-                ran_list.append(top_val)
-                difference -= difference
+                    ran_list.append(top_val-1)
+                    target_weights -= 1
+            return terrain_val[random.choice(ran_list)]
+        
+        #If the top terrain and the left terrain are the same terrain
+        if top_val == left_val:
+            #higher weight here... seems logical
+            weight = 9
+            ran_list = []
+            while target_weights > 0: 
+                while weight > 0:
+                    ran_list.append(top_val)
+                    weight -= 1
+                    target_weights -= 1
+                if top_val < 7:    
+                    ran_list.append(top_val+1)
+                    target_weights -= 1
+                if top_val > 0:
+                    ran_list.append(top_val-1)
+                    target_weights -= 1
+            return terrain_val[random.choice(ran_list)]
+        
+        #If there is a top and left terrain and they are not the same
+        else:
+            
+            #What's the difference in height between the two terrains?
+            #We want the possibility of any terrain between the two to have the cahnce
+            #to appear here
+            difference = abs(top_val - left_val)
+            
+            if i_have_no_idea_what_im_doing:
+                print "zTop: ",top_val," Left: ",left_val
+            
+            #Evenly weight the two different terrains, based on the difference of the two... I don't remember why
+            #I used mod 3 here
+            weight = difference % 3
+            
+            if i_have_no_idea_what_im_doing:
+                print "Weight: ", weight
+                
+            ran_list = []
+            #set large_val to the largest of left_val and top_val
+            large_val = top_val if top_val > left_val else left_val
+            while target_weights > 0: 
+                while weight > 0:
+                    ran_list.append(top_val)
+                    ran_list.append(left_val)
+                    weight -= 1
+                    target_weights -= 2
+                while difference > 0:
+                    #Get the terrain value that's one less than the large value
+                    #This loop will add every value of terrain down to the lower value of either top_val or left_val
+                    if large_val > 0:
+                        large_val = large_val - 1
+                    ran_list.append(large_val)
+                    difference -= 1
+                    target_weights -= 1
+                if top_val < 7:    
+                    ran_list.append(top_val+1)
+                    target_weights -= 1
+                if top_val > 0:
+                    ran_list.append(top_val-1)
+                    target_weights -= 1
             return terrain_val[random.choice(ran_list)]
         
     def terrain_value(self, dic, val):
