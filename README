@@ -1,3 +1,3 @@
-This is my attempt at a 2D terrain generator from scratch. The only resources I've used or will be using are those dealing directly with PyGame (i.e. documentation and/or tutorials for PyGame).
+This is my attempt at a 2D terrain generator from scratch. The only resources I've used and will be using are those dealing directly with PyGame (i.e. documentation and/or tutorials for PyGame).
 
 The point of this was to get an introduction into PyGame, as well as work my way through the logic of what goes into a terrain generator without using outside resources to guide me, just to see if I could do it.
