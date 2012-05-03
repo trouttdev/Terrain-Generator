@@ -43,6 +43,7 @@ class Generator:
     #Can we draw terrain?
     #Sets false at the end of the screen
     canDraw = True
+    done = False
     
     #Start location
     location = locationX, locationY = 0,0
@@ -73,6 +74,9 @@ class Generator:
                     threaded_count += 1
                 else:
                     self.next_terrain = self.draw_terrain(self.next_terrain)
+            elif i_have_no_idea_what_im_doing and not self.canDraw and not self.done:
+                print "All done captain!"
+                self.done = True
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -169,7 +173,7 @@ class Generator:
         #If the top terrain and the left terrain are the same terrain
         if top_val == left_val:
             #higher weight here... seems logical
-            weight = 9
+            weight = 8
             ran_list = []
             while target_weights > 0: 
                 while weight > 0:
@@ -192,12 +196,22 @@ class Generator:
             #to appear here
             difference = abs(top_val - left_val)
             
+            #we want more weights for this since it's a bit more complicated
+            target_weights = 100
+            
             if i_have_no_idea_what_im_doing:
                 print "zTop: ",top_val," Left: ",left_val
             
-            #Evenly weight the two different terrains, based on the difference of the two... I don't remember why
-            #I used mod 3 here
-            weight = difference % 3
+            #we want the weight to be higher if the top and left terrains are closer in
+            #toporaphy, but less if they are more different in topography.
+            #
+            #The theory behind this is that if the top terrain is ocean and the left terrain is
+            #mountain, you're more likely to get someting between the two to create a 'smoother'
+            #overall terrain
+            
+            weight = ((7/difference) * (.8*target_weights))/2 #gives up to an 80% chance that the terrain will
+                                                              #be either the top of left terrain (when they are one
+                                                              #value away from one another)
             
             if i_have_no_idea_what_im_doing:
                 print "Weight: ", weight
@@ -242,10 +256,12 @@ class Generator:
         
         self.location = self.locationX, self.locationY = self.locationX,self.locationY + terrainSize
         
+        #If we went below the screen, go back to the top
         if self.locationY >= height:
             self.locationX = self.locationX + terrainSize
             self.locationY = 0
             
+        #If we went off the side of the screen, stop drawing terrain
         if self.locationX >= width:
             self.canDraw = False
         return self.next_color()
