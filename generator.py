@@ -209,9 +209,10 @@ class Generator:
             #mountain, you're more likely to get someting between the two to create a 'smoother'
             #overall terrain
             
-            weight = ((7/difference) * (.7*target_weights))/2 #gives up to an 80% chance that the terrain will
-                                                              #be either the top of left terrain (when they are one
-                                                              #value away from one another)
+            #gives up to an 80% chance that the terrain will
+            #be either the top of left terrain (when they are one
+            #value away from one another)
+            weight = ((7/difference) * (.7*target_weights))/2 
             
             if i_have_no_idea_what_im_doing:
                 print "Weight: ", weight
